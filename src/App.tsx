@@ -1,24 +1,44 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import { HomePage } from "./pages/HomePage";
+import { Routes, Route } from "react-router-dom";
+import { Header } from "./components/Header/Header";
+import { TasksPage } from "./pages/TasksPage";
+import { CategoryPage } from "./pages/CategoryPage";
+import { TASKS_CATEGORIES } from "./consts/data";
+import { resolveTasksForCategory } from "./utils/taskCategoriesUtils";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <Header />
+      <Routes>
+        <Route index element={<HomePage />} />
+
+        <Route
+          path="zadania"
+          element={<TasksPage categories={TASKS_CATEGORIES} />}
+        ></Route>
+        {TASKS_CATEGORIES.map((category) => (
+          <Route
+            key={category}
+            path={`zadania/${category}`}
+            element={
+              <CategoryPage
+                category={category}
+                tasks={resolveTasksForCategory(category)}
+              />
+            }
+          />
+        ))}
+        <Route
+          path="*"
+          element={
+            <main>
+              <p>There's nothing here!</p>
+            </main>
+          }
+        />
+      </Routes>
     </div>
   );
 }
