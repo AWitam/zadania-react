@@ -2,10 +2,10 @@ import "./App.css";
 import { HomePage } from "./pages/HomePage";
 import { Routes, Route } from "react-router-dom";
 import { Header } from "./components/Header/Header";
-import { TasksPage } from "./pages/TasksPage";
-import { CategoryPage } from "./pages/CategoryPage";
-import { TASKS_CATEGORIES } from "./consts/data";
-import { resolveTasksForCategory } from "./utils/taskCategoriesUtils";
+import { TaskCategoriesPage } from "./pages/TaskCategoriesPage";
+import { TaskPage } from "./pages/TaskPage";
+import { TASKS_DATA } from "./consts/data";
+import { mapTaskToElement } from "./utils/mapTaskToElement";
 
 function App() {
   return (
@@ -13,23 +13,20 @@ function App() {
       <Header />
       <Routes>
         <Route index element={<HomePage />} />
-
         <Route
           path="zadania"
-          element={<TasksPage categories={TASKS_CATEGORIES} />}
+          element={<TaskCategoriesPage taskData={TASKS_DATA} />}
         ></Route>
-        {TASKS_CATEGORIES.map((category) => (
-          <Route
-            key={category}
-            path={`zadania/${category}`}
-            element={
-              <CategoryPage
-                category={category}
-                tasks={resolveTasksForCategory(category)}
-              />
-            }
-          />
-        ))}
+        {TASKS_DATA.map((item: any) => {
+          return item.tasksInCategory.map((task: string) => (
+            <Route
+              path={`zadania/${task}`}
+              element={
+                <TaskPage taskName={task} nodes={mapTaskToElement(task)} />
+              }
+            />
+          ));
+        })}
         <Route
           path="*"
           element={

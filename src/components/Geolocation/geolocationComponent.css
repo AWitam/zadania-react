@@ -1,0 +1,9 @@
+button {
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 1rem;
+}
+
+#map {
+  height: 300px;
+}
