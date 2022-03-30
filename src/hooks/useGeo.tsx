@@ -1,34 +1,80 @@
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 
-export const useGeo = (ref?: any) => {
-  const [status, setStatus] = useState<string>();
-  const [geoData, setGeoData] = useState<any>({
-    longitude: -0.118092,
+type State = {
+  geoData?: Partial<GeolocationCoordinates>;
+  isListening: boolean;
+  statusMessage?: string;
+};
+
+enum ActionTypes {
+  SUCCESS = "SUCCESS",
+  ERROR = "ERROR",
+  TOGGLE_LISTENING = "TOGGLE_LISTENING",
+}
+
+interface ToggleAction {
+  type: ActionTypes.TOGGLE_LISTENING;
+}
+
+interface StatusAction {
+  type: ActionTypes.ERROR;
+  payload: string;
+}
+
+interface GeoDataAction {
+  type: ActionTypes.SUCCESS;
+  payload: Partial<GeolocationCoordinates>;
+}
+
+type Action = StatusAction | ToggleAction | GeoDataAction;
+
+function geolocationStatusReducer(state: State, action: Action): State {
+  switch (action.type) {
+    case ActionTypes.TOGGLE_LISTENING:
+      return { ...state, isListening: !state.isListening };
+    case ActionTypes.ERROR:
+      return { ...state, isListening: false, statusMessage: action.payload };
+    case ActionTypes.SUCCESS:
+      return { ...state, geoData: action.payload };
+    default:
+      return state;
+  }
+}
+
+const initialState = {
+  geoData: {
+    longitude: -0.118092, // Londyn
     latitude: 51.509865,
-  });
-  const [isListening, setListening] = useState(false);
+  },
+  isListening: false,
+};
 
-  const success = (position: any) => {
-    setGeoData(position.coords);
-  };
-
-  const error = () => {
-    setStatus("Wystąpił problem");
-    return;
-  };
+export const useGeo = () => {
+  const [{ geoData, isListening, statusMessage }, dispatch] = useReducer(
+    geolocationStatusReducer,
+    initialState
+  );
 
   const toggleListening = () => {
-    setListening(!isListening);
-    setStatus("Ładowanie...");
+    dispatch({ type: ActionTypes.TOGGLE_LISTENING });
   };
+
+  const success = (position: GeolocationPosition) =>
+    dispatch({ type: ActionTypes.SUCCESS, payload: position.coords });
+
+  const error = (e: GeolocationPositionError) =>
+    dispatch({ type: ActionTypes.ERROR, payload: e.message });
 
   useEffect(() => {
     if (!navigator.geolocation) {
-      setStatus("Geolokalizacja nie jest wspierana w Twojej przeglądarce");
+      dispatch({
+        type: ActionTypes.ERROR,
+        payload: "Geolocation is not supported in your browser!",
+      });
     } else {
       isListening && navigator.geolocation.getCurrentPosition(success, error);
     }
   }, [isListening]);
 
-  return [geoData, isListening, toggleListening, status];
+  return { geoData, isListening, statusMessage, toggleListening };
 };
