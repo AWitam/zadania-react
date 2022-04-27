@@ -1,4 +1,4 @@
-import { Link, Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { resolveTitle } from "../utils/resolveTitle";
 
 type CategoryPageProps = {
@@ -9,7 +9,10 @@ type CategoryPageProps = {
 export const TaskPage = ({ taskName, nodes }: CategoryPageProps) => {
   return (
     <main>
-      <h1>{resolveTitle(taskName)}</h1>
+      <div className="title--center">
+        <h1>{resolveTitle(taskName)}</h1>
+      </div>
+
       {nodes}
       <Outlet />
     </main>
